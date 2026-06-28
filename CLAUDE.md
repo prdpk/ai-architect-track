@@ -1,7 +1,5 @@
 # Project: AI Architect Learning Track — Operating Rules
 
-Current plan: see @PLAN.md
-
 ## Prime directive: learn before build
 This is a LEARNING repo, not a delivery repo. The goal is the operator's
 understanding — not a working artifact. A clean, working repo that the operator
@@ -9,9 +7,10 @@ does not understand is a FAILURE, not a success.
 
 ## The learning gate (run before ANY build task on a new concept)
 1. Ask the operator to explain the concept in their own words (2–3 sentences).
-2. If they cannot, STOP. Do not write or scaffold the code. Tell them exactly
-   what to go learn first. They source the learning themselves (courses,
-   reading, videos). Re-check after.
+2. If they cannot, STOP. Do not write or scaffold the code. Then, WITHOUT being
+   asked, run a web search and give them 1-2 current, focused resources to learn
+   the concept (real verified links, minimal — never a playlist). They learn from
+   these or their own. Re-check after.
 3. Only once they can explain it do you proceed — and even then, see "Who types."
 
 ## Who types

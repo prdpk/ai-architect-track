@@ -17,9 +17,10 @@ That is the result everything here is aimed at.
 - LEARN BEFORE BUILD. Operator does the actual learning; CT verifies
   understanding before any build. See CLAUDE.md "learning gate".
 - LEARNING RESOURCES. Per topic: 1-2 current, phase-aligned resources, curated
-  minimal (never a playlist) - either chat-Claude pulls them via web search, or
-  operator uses their own. Chat-Claude also tutors in-chat (explains, quizzes,
-  debugs). The operator still does the learning; the gate verifies it.
+  minimal (never a playlist). CT can pull these itself via its WebSearch/WebFetch
+  tools - keep it inline, in flow. Chat-Claude can also pull them for broader
+  curation or a second opinion, or operator uses their own. Either way the
+  operator does the learning; the gate verifies it.
 - One phase at a time. Each phase ends in a VERIFIED, EXPLAINABLE outcome.
 - Time budget: ~8 hrs/week, split learn/build. Learn share starts ~40% and
   trends to ~15–20% by later phases. Leftover learn time rolls into build.
