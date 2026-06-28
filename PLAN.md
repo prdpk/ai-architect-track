@@ -13,6 +13,50 @@ written architecture case studies explaining the design and tradeoffs, and
 (3) able to hold a system-design conversation and defend the decisions.
 That is the result everything here is aimed at.
 
+## Career strategy (path to the role)
+Target the CAPABILITY, not the title — the title follows the capability, not the
+other way round. Preferred path: grow architecture scope INSIDE the current org
+as capability develops (~Phase 3+). Ask for and own design decisions / a component
+end-to-end once the system-design vocabulary is real — earn the vocabulary BEFORE
+claiming the scope, not before. Convert learning into owned responsibility at
+work; that real experience + built artifacts = architect-level credibility,
+internal or external. Motivation on record: wants to own systems end-to-end, not
+fix bugs for life — this is the fuel for the slow months.
+
+## Spine project (the thing we grow across all phases)
+A financial/insurance DOCUMENT & DATA INTELLIGENCE platform, built on SYNTHETIC
+data only (IP-safe — no real Mahakal logic or data). It ingests synthetic policy
+documents + synthetic structured records and provides: RAG-grounded Q&A over the
+documents, natural-language analytics over the structured data, and a dashboard.
+Chosen because its complexity is REAL (slow ingestion → genuine reason for async
+queues; costly LLM calls → genuine reason for caching; financial data → genuine
+reason for observability, audit, security). So building it right-fit exercises
+most of the architect surface for honest reasons, not force-fit.
+Phase 2 builds the first slice of this spine (RAG over the synthetic data).
+
+## Two-track learning (how breadth gets covered without wrong instincts)
+- SPINE = built RIGHT-FIT, the way an architect actually would. Uses patterns
+  that truly fit; deliberately omits ones that don't — and can explain why.
+  This is the portfolio + the proof of judgment.
+- SPIKES = small, isolated, throwaway labs for heavy patterns that do NOT fit
+  the spine (Kafka, Kubernetes, microservices, sharding). Goal: feel the pattern
+  hands-on, then articulate its tradeoff. NOT bolted onto the spine.
+- Rule: never force-fit a pattern onto the spine just to "use" it. Knowing when
+  NOT to use something is the architect skill being graded.
+
+## Coverage commitment (the unknown-unknowns guarantee)
+- At the Phase 5 boundary, FIRST build PHASE5.md: a full system-design syllabus
+  (the industry-standard checklist) so concepts get covered by structure, not by
+  what the operator thinks to ask. Examples to include: caching/CDN, load
+  balancing, message queues/Kafka, CAP theorem, indexing/sharding/replication,
+  API gateways/rate limiting/idempotency, observability, failure design (retries,
+  circuit breakers, SPOF), security/auth patterns, cost/capacity, monolith vs
+  microservices, common patterns (CQRS, event-driven, saga).
+- Honest calibration: "in depth" here = can DECIDE and DEFEND every concept +
+  hands-on with the core (spine) + spiked breadth on the heavy ones. It does NOT
+  mean production-specialist in every technology. Nobody is, and the role does
+  not require it.
+
 ## How this plan runs (read with CLAUDE.md)
 - LEARN BEFORE BUILD. Operator does the actual learning; CT verifies
   understanding before any build. See CLAUDE.md "learning gate".
@@ -70,9 +114,10 @@ GitHub; with a 1-page design note.
 Learn: embeddings, vector DBs, chunking, retrieval, prompting patterns, tool/
 function calling, one orchestration framework; applied AI literacy (context
 windows, hallucination, evals).
-Build: a RAG / analytics app over messy real-SHAPED data — use SANITIZED EA log
-schemas + synthetic data as substrate (no real strategy logic, ever).
-Outcome: working RAG app + design note on retrieval tradeoffs.
+Build: the FIRST SLICE of the spine (see "Spine project") — RAG-grounded Q&A
+over SYNTHETIC policy documents. Synthetic data only; no real Mahakal logic or
+data, ever. Keep the slice thin and shippable; later phases grow it.
+Outcome: working RAG app (spine slice 1) + design note on retrieval tradeoffs.
 
 ## PHASE 3 — Script → service: backend + APIs  (~6 weeks, directional)
 Learn: HTTP/REST, FastAPI, request lifecycle, a database (SQL + an ORM), config,

@@ -5,9 +5,11 @@
 
 ## Now
 - Phase: 1 — Foundations through a first real build
-- Week: 1 — Python unblocked
-- Next action: Wk1 DONE. Next is Wk2 — first LLM call (gate: API keys/env vars,
-  request→response, tokens & cost) before any code.
+- Week: 3 — Make it a real tool (IN PROGRESS)
+- Next action: Wk3 capstone build — the RIGHT design: compute the numbers in
+  Python (summarize_trades, exact) and call the LLM ONLY for the prose `summary`.
+  i.e. fix analyze_trades.py to stop asking the LLM for math. Then Wk4 (ship +
+  design note).
 
 ## Status
 - Started on: 2026-06-22
@@ -16,6 +18,22 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-06-29 — Wk3 functions/modules + structured output: refactored summarize.py
+  into pure functions (load_trades/print_trades/summarize_trades, tuple return)
+  + `if __name__=="__main__"` module guard; output unchanged (10/6/4/275).
+  analyze_trades.py: prompt→JSON→json.loads→dict field access (structured output).
+  BIG LESSON: LLM is not a calculator — model returned total_quantity=235 vs
+  correct 275 (induced + caught a hallucination). Rule learned: numbers from
+  code, words from LLM. Operator authored; explained single-responsibility,
+  __name__, json.loads, math-vs-language split. — verified yes
+- 2026-06-28 — Wk2 first LLM call: API billing set up ($5 spend cap), anthropic
+  SDK pinned in requirements.txt, ANTHROPIC_API_KEY via env var. scripts/
+  first_call.py (live Haiku call, parse content[0].text + usage) and
+  summarize_trades.py (prompt = instruction + synthetic rows → summary).
+  Operator authored; explained key=spendable-password, request/response shape,
+  token cost math (~$0.0001/call), AuthenticationError on missing key,
+  max_tokens truncation. NOTE: summarize_trades.py max_tokens bumped 100→400
+  (was truncating). — verified yes
 - 2026-06-28 — scripts/summarize.py: reads synthetic CSV via csv.DictReader,
   prints count/BUY-SELL/total-qty; try/except FileNotFoundError; __file__-anchored
   path (runs from any cwd). Operator authored; passed knowledge check (with vs
@@ -29,5 +47,9 @@
 
 ## Decisions parked for later
 - Geo + cert target (deferred — revisit at Phase 6)
-- Phase 2 spine project (likely RAG over synthetic policy/log data — pin at Phase 2)
+- Spine project PINNED: financial/insurance Document & Data Intelligence platform
+  on synthetic data (see PLAN.md "Spine project"). Grows across all phases.
 - Cloud choice: AWS vs Azure (decide at Phase 4)
+- AT PHASE 5 BOUNDARY: first build PHASE5.md = full system-design syllabus, so all
+  architect concepts (incl. unknown-unknowns) get covered by structure. Heavy
+  patterns covered via study + isolated spikes, not force-fit onto the spine.
