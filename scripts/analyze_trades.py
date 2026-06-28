@@ -1,74 +1,66 @@
 import json
 import anthropic
+from summarize import load_trades, summarize_trades, csv_path
 
 # Create the Anthropic client
 client = anthropic.Anthropic()
 
-# Step 1: Define the trade rows as embedded text
-trade_rows = """\
-2026-01-03,AAPL,BUY,50,191.25
-2026-01-03,MSFT,BUY,30,402.10
-2026-01-05,AAPL,SELL,20,195.80
-2026-01-06,GOOG,BUY,15,141.55
-2026-01-08,MSFT,SELL,30,410.00
-2026-01-09,NVDA,BUY,40,128.90
-2026-01-10,AAPL,BUY,25,188.40
-2026-01-12,GOOG,SELL,15,139.20
-2026-01-13,NVDA,SELL,40,134.65
-2026-01-15,MSFT,BUY,10,415.30
-"""
+try:
+    # Load the trades from the CSV
+    trades = load_trades(csv_path)
 
-# Step 2: Build the prompt
-prompt = f"""
-Here are some trades.
+    # Compute all numbers in Python
+    total_trades, buy_count, sell_count, total_quantity = summarize_trades(trades)
 
-Return ONLY a JSON object with these exact keys:
-- total_trades
-- buy_count
-- sell_count
-- total_quantity
-- summary
+    # Convert trades to text for the prompt
+    trade_rows = "\n".join(
+        f'{t["date"]},{t["symbol"]},{t["side"]},{t["quantity"]},{t["price"]}'
+        for t in trades
+    )
 
-Respond with only the JSON object and no other text.
-Do NOT wrap the JSON in markdown.
-Do NOT use ```json.
-Do NOT include any explanation or extra text.
+    # Build the prompt
+    prompt = f"""
+Here are some trades:
 
-Trades:
 {trade_rows}
+
+Write one short plain-English sentence describing the trading activity.
+
+Mention:
+- which symbols were traded
+- the overall buying and selling activity
+
+Do NOT output counts, totals, quantities, prices, or any numbers.
+Return only the sentence.
 """
 
-# Step 3: Call Claude Haiku
-message = client.messages.create(
-    model="claude-haiku-4-5",
-    max_tokens=400,
-    messages=[
-        {
-            "role": "user",
-            "content": prompt,
-        }
-    ],
-)
+    # Call Claude Haiku
+    message = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=400,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+    )
 
-# Step 4: Get the JSON response
-response_text = message.content[0].text
+    summary = message.content[0].text.strip()
 
-print("Raw response:")
-print(repr(response_text))
+    # Assemble the final result in Python
+    result = {
+        "total_trades": total_trades,
+        "buy_count": buy_count,
+        "sell_count": sell_count,
+        "total_quantity": total_quantity,
+        "summary": summary,
+    }
 
-# Step 5: Parse the JSON
-data = json.loads(response_text)
+    print(result)
 
-# Step 6: Print the parsed data
-print("Parsed JSON:")
-print(data)
+    print("\nUsage:")
+    print(message.usage)
 
-print("\nTotal Quantity:")
-print(data["total_quantity"])
-
-print("\nSummary:")
-print(data["summary"])
-
-# Step 7: Print token usage
-print("\nUsage:")
-print(message.usage)
+except FileNotFoundError:
+    print(f"Error: '{csv_path}' does not exist.")

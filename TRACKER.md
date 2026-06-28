@@ -5,11 +5,10 @@
 
 ## Now
 - Phase: 1 — Foundations through a first real build
-- Week: 3 — Make it a real tool (IN PROGRESS)
-- Next action: Wk3 capstone build — the RIGHT design: compute the numbers in
-  Python (summarize_trades, exact) and call the LLM ONLY for the prose `summary`.
-  i.e. fix analyze_trades.py to stop asking the LLM for math. Then Wk4 (ship +
-  design note).
+- Week: 3 — Make it a real tool (DONE)
+- Next action: Wk4 — ship + design note (gate: README/repo conventions, what an
+  ADR / design note is) before building. Push to GitHub w/ clean README + 1-page
+  design note (decisions + 2-3 tradeoffs + "what I'd change at scale").
 
 ## Status
 - Started on: 2026-06-22
@@ -18,6 +17,12 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-06-29 — Wk3 build DONE (right-design): analyze_trades.py now imports
+  load_trades/summarize_trades from summarize module, computes numbers in code
+  (total_quantity=275 exact, no LLM math), LLM produces ONLY the prose summary,
+  result assembled as dict. FileNotFoundError handled at call site (load_trades
+  kept pure). Verified missing-file path (clean msg, no traceback). Done bar met:
+  CSV-in→structured-out, env key, missing-file, functions/module. — verified yes
 - 2026-06-29 — Wk3 functions/modules + structured output: refactored summarize.py
   into pure functions (load_trades/print_trades/summarize_trades, tuple return)
   + `if __name__=="__main__"` module guard; output unchanged (10/6/4/275).
