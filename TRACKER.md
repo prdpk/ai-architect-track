@@ -4,12 +4,12 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 1 — Foundations through a first real build (COMPLETE)
-- Week: 4 — Ship + design note (DONE)
-- Next action: PHASE 2 — RAG & the AI application layer (spine slice 1: RAG
-  Q&A over synthetic policy docs). Gate concepts before any build: embeddings,
-  vector DBs, chunking, retrieval, one orchestration framework. Source learning,
-  then gate.
+- Phase: 2 — RAG & the AI application layer (IN PROGRESS)
+- Last done: minimal hand-rolled RAG working end-to-end (rag_demo.py).
+- Next action: refine the minimal RAG — add a similarity THRESHOLD (skip LLM /
+  return "no relevant policy" when top score is low) + retrieve top-k instead of
+  top-1. Then real concepts: chunking, a vector DB, an orchestration framework,
+  over more/real-shaped synthetic policy docs.
 
 ## Status
 - Started on: 2026-06-22
@@ -18,6 +18,14 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-06-29 — PHASE 2 START: passed RAG/embeddings gate (retrieve→augment→
+  generate; embeddings = meaning vectors; same-model query; semantic > keyword).
+  Built minimal hand-rolled RAG (scripts/rag_demo.py): local sentence-transformers
+  (all-MiniLM-L6-v2) embeds synthetic policy snippets, cosine-sim retrieval (util.
+  cos_sim), top match → grounded Claude prompt. Verified: "broke in/took laptop"→
+  theft snippet (semantic, 0 keyword overlap); "earthquake?"→"I don't have that"
+  (anti-hallucination grounding). Insight: retrieval always returns a top match →
+  need a score THRESHOLD. Operator authored. — verified yes
 - 2026-06-29 — Wk4 SHIP: repo pushed to GitHub (github.com/prdpk/ai-architect-track,
   public, SSH). README.md (overview/prereqs/install/config/structure/run/output/
   limitations, incl. run-from-scripts import gotcha) + docs/design-note.md (ADR:
