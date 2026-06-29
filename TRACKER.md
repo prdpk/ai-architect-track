@@ -4,11 +4,12 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 1 — Foundations through a first real build
-- Week: 3 — Make it a real tool (DONE)
-- Next action: Wk4 — ship + design note (gate: README/repo conventions, what an
-  ADR / design note is) before building. Push to GitHub w/ clean README + 1-page
-  design note (decisions + 2-3 tradeoffs + "what I'd change at scale").
+- Phase: 1 — Foundations through a first real build (COMPLETE)
+- Week: 4 — Ship + design note (DONE)
+- Next action: PHASE 2 — RAG & the AI application layer (spine slice 1: RAG
+  Q&A over synthetic policy docs). Gate concepts before any build: embeddings,
+  vector DBs, chunking, retrieval, one orchestration framework. Source learning,
+  then gate.
 
 ## Status
 - Started on: 2026-06-22
@@ -17,6 +18,12 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-06-29 — Wk4 SHIP: repo pushed to GitHub (github.com/prdpk/ai-architect-track,
+  public, SSH). README.md (overview/prereqs/install/config/structure/run/output/
+  limitations, incl. run-from-scripts import gotcha) + docs/design-note.md (ADR:
+  numbers-from-code/words-from-LLM, 3 tradeoffs, 3 scale changes incl. caching).
+  Operator authored both, passed gate (README purpose, what an ADR is + why).
+  PHASE 1 COMPLETE. — verified yes
 - 2026-06-29 — Wk3 build DONE (right-design): analyze_trades.py now imports
   load_trades/summarize_trades from summarize module, computes numbers in code
   (total_quantity=275 exact, no LLM math), LLM produces ONLY the prose summary,
