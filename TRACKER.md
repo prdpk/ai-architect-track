@@ -5,11 +5,12 @@
 
 ## Now
 - Phase: 2 — RAG & the AI application layer (IN PROGRESS)
-- Last done: minimal hand-rolled RAG working end-to-end (rag_demo.py).
-- Next action: refine the minimal RAG — add a similarity THRESHOLD (skip LLM /
-  return "no relevant policy" when top score is low) + retrieve top-k instead of
-  top-1. Then real concepts: chunking, a vector DB, an orchestration framework,
-  over more/real-shaped synthetic policy docs.
+- Last done: RAG with chunking + Chroma vector DB (persistent, embed-once).
+- Next action: grow toward spine slice 1 — real-shaped LONGER synthetic policy
+  docs (multi-topic paragraphs) to make chunking + overlap matter; implement
+  chunk overlap; consider re-ranking. Then an orchestration framework (LangChain/
+  LlamaIndex) once the hand-rolled pipeline is fully understood. Applied AI
+  literacy (evals) woven in.
 
 ## Status
 - Started on: 2026-06-22
@@ -18,6 +19,13 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-02 — Phase 2 RAG deepened: reasoned threshold role (cost filter, not
+  correctness; scores uncalibrated — earthquake 0.43 bad > laptop 0.35 good),
+  re-ranking, grounding-as-safety-net. Built chunking (split doc → chunks) and
+  chunk-size/overlap reasoning. Wired Chroma vector DB (rag_chunked.py):
+  bring-your-own sentence-transformers embeddings, PersistentClient, embed-once
+  guard, distance-based retrieval (L2, lower=closer). Verified persistence across
+  process restarts. chroma_db/ gitignored. Operator authored. — verified yes
 - 2026-06-29 — PHASE 2 START: passed RAG/embeddings gate (retrieve→augment→
   generate; embeddings = meaning vectors; same-model query; semantic > keyword).
   Built minimal hand-rolled RAG (scripts/rag_demo.py): local sentence-transformers
