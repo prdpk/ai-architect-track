@@ -5,12 +5,12 @@
 
 ## Now
 - Phase: 2 — RAG & the AI application layer (IN PROGRESS)
-- Last done: RAG with chunking + Chroma vector DB (persistent, embed-once).
-- Next action: grow toward spine slice 1 — real-shaped LONGER synthetic policy
-  docs (multi-topic paragraphs) to make chunking + overlap matter; implement
-  chunk overlap; consider re-ranking. Then an orchestration framework (LangChain/
-  LlamaIndex) once the hand-rolled pipeline is fully understood. Applied AI
-  literacy (evals) woven in.
+- Last done: RAG rebuilt through LangChain (framework). Hand-rolled + framework
+  versions both done; understands the mapping + tradeoffs.
+- Next action: toward spine slice 1 — pick real-shaped synthetic policy docs,
+  add re-ranking / metadata, and applied AI literacy (EVALS: how do we measure if
+  retrieval + answers are good?). Then Phase 3 turns this into a real API/service
+  (build pipeline once at startup, chain.invoke per request).
 
 ## Status
 - Started on: 2026-06-22
@@ -19,6 +19,15 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-03 — Phase 2 orchestration framework: implemented overlap chunking
+  (rag_chunked_overlap.py, sliding window) + reasoned chunk-size/overlap and
+  derived recursive/structure-aware splitting; measured the size/specificity
+  tradeoff (bigger chunk → higher distance 1.04 vs 0.70, richer answer). Rebuilt
+  the whole RAG via LangChain (rag_langchain.py): RecursiveCharacterTextSplitter,
+  HuggingFaceEmbeddings, Chroma, as_retriever, ChatAnthropic, ChatPromptTemplate,
+  LCEL chain. Reasoned the transparency tradeoff (concise but hidden flow),
+  eager-index vs lazy-chain, and query = only dynamic input → deployment shape.
+  Operator authored + defended the mapping. — verified yes
 - 2026-07-02 — Phase 2 RAG deepened: reasoned threshold role (cost filter, not
   correctness; scores uncalibrated — earthquake 0.43 bad > laptop 0.35 good),
   re-ranking, grounding-as-safety-net. Built chunking (split doc → chunks) and
