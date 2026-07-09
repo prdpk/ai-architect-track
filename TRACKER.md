@@ -5,12 +5,13 @@
 
 ## Now
 - Phase: 2 — RAG & the AI application layer (IN PROGRESS)
-- Last done: RAG rebuilt through LangChain (framework). Hand-rolled + framework
-  versions both done; understands the mapping + tradeoffs.
-- Next action: toward spine slice 1 — pick real-shaped synthetic policy docs,
-  add re-ranking / metadata, and applied AI literacy (EVALS: how do we measure if
-  retrieval + answers are good?). Then Phase 3 turns this into a real API/service
-  (build pipeline once at startup, chain.invoke per request).
+- Last done: retrieval EVAL harness (hit rate over a golden set). Hardened it with
+  adversarial paraphrases + an unanswerable case → dropped 100% → 60%, exposing
+  real chunking + threshold-calibration failures.
+- Next action: the measure→fix→re-measure loop — try a fix (better chunking so
+  flood isn't smeared; a real relevance check instead of a fixed threshold) and
+  move the 60% up. Then answer-quality evals (LLM-as-judge). Then Phase 3 (turn
+  the pipeline into a real API/service).
 
 ## Status
 - Started on: 2026-06-22
@@ -19,6 +20,14 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-09 — Phase 2 evals: passed evals gate (one query ≠ representative; need
+  a golden set with expected outputs; retrieval vs answer quality fail
+  independently). Built scripts/eval_retrieval.py (hit rate over a golden set).
+  Learned that a green eval can be too weak to fail → hardened with adversarial
+  paraphrases + an unanswerable earthquake case: 100% → 60%, measuring the SAME
+  chunking (flood smeared) + threshold-miscalibration (earthquake 0.52 > legit
+  0.28) problems reasoned earlier. Meta-lesson: a good eval is one you can fail.
+  Operator authored. — verified yes
 - 2026-07-03 — Phase 2 orchestration framework: implemented overlap chunking
   (rag_chunked_overlap.py, sliding window) + reasoned chunk-size/overlap and
   derived recursive/structure-aware splitting; measured the size/specificity
