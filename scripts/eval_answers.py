@@ -1,3 +1,5 @@
+import anthropic
+
 from sentence_transformers import SentenceTransformer, CrossEncoder, util
 
 # Load embedding model
@@ -8,8 +10,60 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 # The L12 variant produces finite scores and is used here.
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L12-v2")
 
+# Create Anthropic client for LLM-as-judge
+client = anthropic.Anthropic()
+
 # Number of candidates retrieved before reranking
 TOP_K = 2
+
+
+def judge_answerability(question, context):
+    """
+    Ask Claude whether the retrieved context contains enough
+    information to answer the question.
+
+    Returns either "YES" or "NO".
+    """
+
+    judge_prompt = f"""
+You are evaluating whether retrieved policy context contains enough
+information to answer a user's question.
+
+Question:
+{question}
+
+Retrieved context:
+{context}
+
+Rules:
+- Return YES only if the context directly contains enough information
+  to answer the question.
+- Return NO if the context is unrelated, incomplete, or only discusses
+  a different type of damage.
+- Do not answer the user's question.
+- Respond with only YES or NO.
+"""
+
+    message = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=10,
+        messages=[
+            {
+                "role": "user",
+                "content": judge_prompt,
+            }
+        ],
+    )
+
+    judgement = message.content[0].text.strip().upper()
+
+    if judgement not in {"YES", "NO"}:
+        raise ValueError(
+            f"Unexpected judge response: {judgement!r}"
+        )
+
+    return judgement
+
 
 # Synthetic policy document
 policy_document = """
@@ -51,7 +105,7 @@ test_set = [
 
 hits = 0
 
-print("\n===== Retrieval Evaluation =====\n")
+print("\n===== Retrieval and Answerability Evaluation =====\n")
 
 for question, expected in test_set:
 
@@ -59,9 +113,10 @@ for question, expected in test_set:
     query_embedding = model.encode(question)
 
     # Compute cosine similarity between query and chunks
-    scores = util.cos_sim(query_embedding, chunk_embeddings)[0]
-
-    print("Exact cosine scores:", scores)
+    scores = util.cos_sim(
+        query_embedding,
+        chunk_embeddings,
+    )[0]
 
     # Rank all chunks using cosine similarity
     ranked = sorted(
@@ -73,20 +128,24 @@ for question, expected in test_set:
     # Retrieve the top candidates
     top_chunks = ranked[:TOP_K]
 
-    # Build question-chunk pairs for the cross-encoder
+    # Build question-chunk pairs for the CrossEncoder
     pairs = [
         (question, chunk)
         for chunk, _ in top_chunks
     ]
 
-    # Re-score the candidates using the cross-encoder
+    # Re-score candidates using the CrossEncoder
     rerank_scores = reranker.predict(pairs)
 
-    # Combine the chunks with their cosine and reranker scores,
+    # Combine each chunk with its cosine and reranker scores,
     # then sort using the reranker score
     reranked = sorted(
         [
-            (chunk, float(cosine_score), float(rerank_score))
+            (
+                chunk,
+                float(cosine_score),
+                float(rerank_score),
+            )
             for (chunk, cosine_score), rerank_score
             in zip(top_chunks, rerank_scores)
         ],
@@ -94,16 +153,32 @@ for question, expected in test_set:
         reverse=True,
     )
 
-    # Best candidate after cross-encoder reranking
+    # Best candidate after CrossEncoder reranking
     best_chunk = reranked[0][0]
 
+    # Separate LLM call judges whether the best chunk
+    # contains enough information to answer the question
+    judge_result = judge_answerability(
+        question,
+        best_chunk,
+    )
+
     if expected is None:
-        # Retrieval always returns the nearest candidate.
-        # Answerability will be evaluated separately.
-        found = False
+        # Golden set says this question is unanswerable,
+        # so the judge should return NO
+        found = judge_result == "NO"
     else:
-        # Check whether the reranker placed the expected chunk first
-        found = expected.lower() in best_chunk.lower()
+        # Two conditions must pass:
+        # 1. The reranker placed the expected chunk first.
+        # 2. The judge says the chunk can answer the question.
+        correct_chunk = (
+            expected.lower() in best_chunk.lower()
+        )
+
+        found = (
+            correct_chunk
+            and judge_result == "YES"
+        )
 
     if found:
         hits += 1
@@ -112,17 +187,15 @@ for question, expected in test_set:
         status = "✗"
 
     print(f"{status} {question}")
+    print(f"   Expected topic: {expected}")
+    print(f"   LLM judge: {judge_result}")
 
-    if expected is None:
-        print(
-            "   Unanswerable detection is not evaluated by the reranker. "
-            "This will be handled separately."
-        )
+    for rank, (
+        chunk,
+        cosine_score,
+        rerank_score,
+    ) in enumerate(reranked, start=1):
 
-    for rank, (chunk, cosine_score, rerank_score) in enumerate(
-        reranked,
-        start=1,
-    ):
         print(
             f"   Rank {rank} | "
             f"Cosine: {cosine_score:.4f} | "
@@ -133,6 +206,6 @@ for question, expected in test_set:
 
 hit_rate = hits / len(test_set)
 
-print("=" * 40)
+print("=" * 50)
 print(f"Hits     : {hits}/{len(test_set)}")
 print(f"Hit Rate : {hit_rate:.2%}")

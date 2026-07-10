@@ -4,14 +4,12 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 2 — RAG & the AI application layer (IN PROGRESS)
-- Last done: retrieval EVAL harness (hit rate over a golden set). Hardened it with
-  adversarial paraphrases + an unanswerable case → dropped 100% → 60%, exposing
-  real chunking + threshold-calibration failures.
-- Next action: the measure→fix→re-measure loop — try a fix (better chunking so
-  flood isn't smeared; a real relevance check instead of a fixed threshold) and
-  move the 60% up. Then answer-quality evals (LLM-as-judge). Then Phase 3 (turn
-  the pipeline into a real API/service).
+- Phase: 3 — Script -> service: backend + APIs (STARTING). Phase 2 app-layer core
+  done (RAG hand-rolled + framework + evals + reranking + LLM-as-judge).
+- Next action: Phase 3 gate — HTTP/REST, what an API is, FastAPI, request
+  lifecycle. Then wrap the RAG behind a real API endpoint (build pipeline once at
+  startup, invoke per request — the shape the operator already derived). Later:
+  a DB + ORM, config, testing, a simple web UI. Working CS literacy woven in here.
 
 ## Status
 - Started on: 2026-06-22
@@ -20,6 +18,14 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-11 — Phase 2 evals part 2: measure->fix->re-measure loop. Fixed chunking
+  (paragraph splits) → flood miss resolved, 60%->80% (diagnosis-first). Added
+  cross-encoder reranking (fixed L6->L12 NaN-on-Apple-Silicon bug); learned rerank
+  absolute scores are ALSO uncalibrated + reranker only reorders (no benefit on
+  clean data — right-fit evidence to omit it). Built LLM-as-judge answerability
+  (eval_answers.py): separate Claude call reads question+context → YES/NO. SOLVED
+  the earthquake unanswerable case no threshold could. Learned "grade the grader":
+  the waterlogged-basement fail was a bad golden label, not a system bug. — verified yes
 - 2026-07-09 — Phase 2 evals: passed evals gate (one query ≠ representative; need
   a golden set with expected outputs; retrieval vs answer quality fail
   independently). Built scripts/eval_retrieval.py (hit rate over a golden set).
