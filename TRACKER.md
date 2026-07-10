@@ -4,12 +4,13 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 3 — Script -> service: backend + APIs (STARTING). Phase 2 app-layer core
-  done (RAG hand-rolled + framework + evals + reranking + LLM-as-judge).
-- Next action: Phase 3 gate — HTTP/REST, what an API is, FastAPI, request
-  lifecycle. Then wrap the RAG behind a real API endpoint (build pipeline once at
-  startup, invoke per request — the shape the operator already derived). Later:
-  a DB + ORM, config, testing, a simple web UI. Working CS literacy woven in here.
+- Phase: 3 — Script -> service: backend + APIs (IN PROGRESS).
+- Last done: RAG is now a real FastAPI service (app/ package): GET / + POST /ask,
+  Pydantic schemas (input validation for free), RAG pipeline built once at
+  startup, docs read from data/policies/, auto /docs. Runs via `fastapi dev`.
+- Next action: config (stop hardcoding — env/settings), move evals into evals/
+  folder + wire as a CI quality gate, testing basics (pytest), maybe a DB + ORM
+  and a simple web UI. Working CS literacy woven in.
 
 ## Status
 - Started on: 2026-06-22
@@ -18,6 +19,13 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-11 — Phase 3 first service: passed API gate (request/response, why an
+  API). Built app/ package — FastAPI GET / + POST /ask, app/schemas.py (Pydantic
+  AskRequest/AskResponse → free 422 input validation + self-documenting contract),
+  app/rag.py (LangChain pipeline built ONCE at startup; reads docs from
+  data/policies/ via __file__-anchored path; answer() = per-request chain.invoke).
+  Operator drove the project-structure decision (deployable app/ vs non-deployable
+  scripts/evals) + built /ask endpoint unprompted. Verified live via /docs. — verified yes
 - 2026-07-11 — Phase 2 evals part 2: measure->fix->re-measure loop. Fixed chunking
   (paragraph splits) → flood miss resolved, 60%->80% (diagnosis-first). Added
   cross-encoder reranking (fixed L6->L12 NaN-on-Apple-Silicon bug); learned rerank
