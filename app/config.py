@@ -1,3 +1,4 @@
+import logging
 from typing import Literal
 
 from pydantic import Field
@@ -36,5 +37,25 @@ class Settings(BaseSettings):
     # Backend selector
     rag_backend: Literal["langchain", "manual"] = "langchain"
 
+    # Logging
+    log_level: str = "INFO"
+
 
 settings = Settings()
+
+
+# Configure application logging once, here. This module is imported before the
+# backends build, so every module's logger shares one format and level.
+# Control verbosity from the environment: LOG_LEVEL=DEBUG in .env to see the
+# per-request dumps; default INFO keeps production quiet.
+# Keep the ROOT level at WARNING so third-party libraries (urllib3, httpcore,
+# anthropic, sentence_transformers, ...) stay quiet by default. Setting the root
+# to DEBUG would turn on DEBUG for EVERY library and flood the logs.
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+)
+
+# Raise ONLY our own application logger ("app" and its children) to the
+# configured level — so LOG_LEVEL controls OUR verbosity, not the libraries'.
+logging.getLogger("app").setLevel(settings.log_level.upper())

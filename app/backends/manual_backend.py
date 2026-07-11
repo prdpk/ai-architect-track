@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import anthropic
@@ -7,9 +8,13 @@ from sentence_transformers import SentenceTransformer
 from app.backends.base import RAGBackend
 from app.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 class ManualRAG(RAGBackend):
     def __init__(self) -> None:
+        logger.info("Initializing Manual RAG backend")
+
         # Locate the policy documents folder
         policies_dir = (
             Path(__file__).resolve().parent.parent.parent
@@ -22,6 +27,10 @@ class ManualRAG(RAGBackend):
         )
 
         if not policy_files:
+            logger.error(
+                "No .txt policy documents found in: %s",
+                policies_dir,
+            )
             raise RuntimeError(
                 "No .txt policy documents found in: "
                 f"{policies_dir}"
@@ -64,17 +73,25 @@ class ManualRAG(RAGBackend):
 
             chunks.extend(file_chunks)
 
-        print("Policy Chunks:\n")
-
-        for i, chunk in enumerate(chunks, start=1):
-            print(f"{i}. {chunk}\n")
+        logger.info(
+            "Loaded %d chunks from %d policy files",
+            len(chunks),
+            len(policy_files),
+        )
+        logger.debug(
+            "Chunks:\n%s",
+            "\n".join(
+                f"{i}. {chunk}"
+                for i, chunk in enumerate(chunks, start=1)
+            ),
+        )
 
         # Store chunks in ChromaDB only once
         if self.collection.count() == 0:
             embeddings = self.model.encode(chunks)
 
-            print(
-                "Embedding shape:",
+            logger.debug(
+                "Embedding shape: %s",
                 embeddings.shape,
             )
 
@@ -87,16 +104,17 @@ class ManualRAG(RAGBackend):
                 ],
             )
 
-            print("Embedded and stored chunks.")
+            logger.info("Embedded and stored chunks")
         else:
-            print(
-                "Chunks already stored — skipping embedding."
+            logger.info(
+                "Chunks already stored — skipping embedding"
             )
 
     def answer(self, question: str) -> str:
         query = question.strip()
 
         if not query:
+            logger.warning("Received an empty question")
             raise ValueError(
                 "Question cannot be empty."
             )
@@ -115,17 +133,17 @@ class ManualRAG(RAGBackend):
         retrieved = results["documents"][0]
         distances = results["distances"][0]
 
-        print("\nQuery:", query)
-        print("\nRetrieved Chunks:\n")
-
-        for rank, (chunk, distance) in enumerate(
-            zip(retrieved, distances),
-            start=1,
-        ):
-            print(
-                f"{rank}. Distance: {distance:.4f}"
-            )
-            print(f"   {chunk}\n")
+        logger.debug("Query: %s", query)
+        logger.debug(
+            "Retrieved chunks:\n%s",
+            "\n".join(
+                f"{rank}. Distance: {distance:.4f} | {chunk}"
+                for rank, (chunk, distance) in enumerate(
+                    zip(retrieved, distances),
+                    start=1,
+                )
+            ),
+        )
 
         # Build context from retrieved chunks
         context = "\n".join(retrieved)
@@ -144,9 +162,7 @@ class ManualRAG(RAGBackend):
           {query}
         """
 
-        print("\n--- PROMPT SENT TO CLAUDE ---")
-        print(prompt)
-        print("-----------------------------\n")
+        logger.debug("Prompt sent to Claude:\n%s", prompt)
 
         # Call Claude
         message = self.client.messages.create(
@@ -160,10 +176,9 @@ class ManualRAG(RAGBackend):
             ],
         )
 
-        print("Claude's Answer:")
-        print(message.content[0].text)
+        answer_text = message.content[0].text
 
-        print("\nUsage:")
-        print(message.usage)
+        logger.debug("Claude's answer: %s", answer_text)
+        logger.debug("Usage: %s", message.usage)
 
-        return message.content[0].text
+        return answer_text

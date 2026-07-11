@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from langchain_anthropic import ChatAnthropic
@@ -11,9 +12,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.backends.base import RAGBackend
 from app.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 class LangChainRAG(RAGBackend):
     def __init__(self) -> None:
+        logger.info("Initializing LangChain RAG backend")
+
         # Locate the policy documents folder
         policies_dir = (
             Path(__file__).resolve().parent.parent.parent
@@ -26,6 +31,10 @@ class LangChainRAG(RAGBackend):
         )
 
         if not policy_files:
+            logger.error(
+                "No .txt policy documents found in: %s",
+                policies_dir,
+            )
             raise RuntimeError(
                 "No .txt policy documents found in: "
                 f"{policies_dir}"
@@ -50,13 +59,18 @@ class LangChainRAG(RAGBackend):
 
             chunks.extend(file_chunks)
 
-        print("\nPolicy Chunks:")
-
-        for i, chunk in enumerate(
-            chunks,
-            start=1,
-        ):
-            print(f"{i}. {chunk}\n")
+        logger.info(
+            "Loaded %d chunks from %d policy files",
+            len(chunks),
+            len(policy_files),
+        )
+        logger.debug(
+            "Chunks:\n%s",
+            "\n".join(
+                f"{i}. {chunk}"
+                for i, chunk in enumerate(chunks, start=1)
+            ),
+        )
 
         # 2. EMBEDDINGS
         embeddings = HuggingFaceEmbeddings(
@@ -110,6 +124,8 @@ class LangChainRAG(RAGBackend):
             | StrOutputParser()
         )
 
+        logger.info("LangChain RAG backend ready")
+
     # Helper: convert retrieved Document objects into text
     @staticmethod
     def format_docs(docs) -> str:
@@ -122,9 +138,12 @@ class LangChainRAG(RAGBackend):
         cleaned_question = question.strip()
 
         if not cleaned_question:
+            logger.warning("Received an empty question")
             raise ValueError(
                 "Question cannot be empty."
             )
+
+        logger.debug("Answering question: %s", cleaned_question)
 
         return self.chain.invoke(
             cleaned_question

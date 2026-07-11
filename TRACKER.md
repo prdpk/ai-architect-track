@@ -10,9 +10,10 @@
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: (1) logging over print (the "logging" NFR), (2) testing basics
-  (pytest against /ask), (3) minor cleanups (anchor manual chroma_db path, DRY
-  the shared policy-loading/prompt, SecretStr for the key), then a web UI.
+- Next action: (1) testing basics (pytest against /ask), (2) minor cleanups
+  (anchor manual chroma_db path, DRY shared policy-loading/prompt, SecretStr),
+  then a web UI. [logging DONE — structured, module-tagged, root=WARNING +
+  app logger at LOG_LEVEL so libraries stay quiet and DEBUG shows only our code.]
 
 ## Status
 - Started on: 2026-06-22
