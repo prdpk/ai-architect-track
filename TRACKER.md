@@ -5,12 +5,14 @@
 
 ## Now
 - Phase: 3 — Script -> service: backend + APIs (IN PROGRESS).
-- Last done: RAG is now a real FastAPI service (app/ package): GET / + POST /ask,
-  Pydantic schemas (input validation for free), RAG pipeline built once at
-  startup, docs read from data/policies/, auto /docs. Runs via `fastapi dev`.
-- Next action: config (stop hardcoding — env/settings), move evals into evals/
-  folder + wire as a CI quality gate, testing basics (pytest), maybe a DB + ORM
-  and a simple web UI. Working CS literacy woven in.
+- Last done: config layer (app/config.py, Pydantic BaseSettings, .env) +
+  SWAPPABLE backend (strategy pattern): app/backends/base.py interface (ABC),
+  langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
+  Both consume settings; api_key passed explicitly. One /ask endpoint, engine
+  swaps via config.
+- Next action: (1) logging over print (the "logging" NFR), (2) testing basics
+  (pytest against /ask), (3) minor cleanups (anchor manual chroma_db path, DRY
+  the shared policy-loading/prompt, SecretStr for the key), then a web UI.
 
 ## Status
 - Started on: 2026-06-22
@@ -19,6 +21,14 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-11 — Phase 3 config + swappable backend: passed config gate (secrets
+  out of code; externalize knobs). app/config.py (Pydantic BaseSettings, Literal
+  backend, validation_alias for key). Refactored RAG into app/backends/ strategy
+  pattern — base.py ABC interface + LangChainRAG + ManualRAG, factory selector in
+  rag.py picks by config; both consume settings. Hit + fixed a real config gotpcha:
+  stale exported ANTHROPIC_API_KEY in shell overrode .env (env vars > .env) →
+  401 after key rotation; fixed by unset + passing api_key explicitly from
+  settings. (Also rotated the key after it was shown in-session.) — verified yes
 - 2026-07-11 — Phase 3 first service: passed API gate (request/response, why an
   API). Built app/ package — FastAPI GET / + POST /ask, app/schemas.py (Pydantic
   AskRequest/AskResponse → free 422 input validation + self-documenting contract),
