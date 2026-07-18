@@ -4,15 +4,18 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 3 — Script -> service: backend + APIs (IN PROGRESS).
+- Phase: 4 — Cloud + deployment (IN PROGRESS). Containerization DONE.
 - Last done: config layer (app/config.py, Pydantic BaseSettings, .env) +
   SWAPPABLE backend (strategy pattern): app/backends/base.py interface (ABC),
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: Phase 3 wrap-up + decide Phase 4 (Docker/deploy) vs parked
-  cleanups (DRY shared policy-loading/prompt, SecretStr). [web UI DONE;
-  chroma_db path fix DONE; DI DONE; testing DONE; logging DONE.]
+- Next action: Phase 4 deploy — DECIDE cloud (AWS vs Azure), then deploy the
+  container; after that CI/CD + basic monitoring. Docker install note: macOS
+  Ventura can't run current Docker Desktop (needs Sonoma) → using Colima
+  (4 CPU / 4 GB VM) + docker CLI. Parked: DRY, SecretStr, pre-bake embedding
+  model into image (first /ask was 42s: runtime model download). [containerize
+  DONE; web UI DONE; DI DONE; testing DONE; logging DONE.]
 
 ## Status
 - Started on: 2026-06-22
@@ -21,6 +24,16 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-18 — Phase 4 containerization: passed the Docker gate (container vs VM:
+  shares host kernel, lighter, weaker isolation; bake code/deps into image, inject
+  secrets at runtime). Wrote Dockerfile (python:3.13-slim, layer-cache order:
+  requirements before code, uvicorn --host 0.0.0.0) + .dockerignore (excludes
+  .env/.venv/chroma_db/caches). Hit + fixed a real deploy bug: aarch64 Linux torch
+  pulls ~850MB+ of unusable CUDA libs (no GPU) and timed out downloading — fixed by
+  installing torch==2.11.0+cpu from the PyTorch CPU index first (satisfies the pin,
+  CUDA never resolved). Image 2.25GB. Ran with -p 8000:8000 --env-file .env; live
+  container returned grounded theft answer (first /ask 42s = runtime model download).
+  Colima on Ventura (Docker Desktop needs Sonoma). — verified yes
 - 2026-07-18 — Phase 3 web UI: passed the client/server-boundary gate (HTTP+JSON
   crosses the boundary; chose static-frontend+fetch over server-rendered to keep
   /ask reusable; understood same-origin vs CORS). Built app/static/index.html
