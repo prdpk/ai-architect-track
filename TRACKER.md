@@ -10,10 +10,11 @@
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: (1) testing basics (pytest against /ask), (2) minor cleanups
-  (anchor manual chroma_db path, DRY shared policy-loading/prompt, SecretStr),
-  then a web UI. [logging DONE — structured, module-tagged, root=WARNING +
-  app logger at LOG_LEVEL so libraries stay quiet and DEBUG shows only our code.]
+- Next action: DI refactor (FastAPI Depends) — inject the backend so tests
+  override it with a fake (no real pipeline build); also makes the build lazy
+  (fixes the ~17s test import). Then minor cleanups (anchor manual chroma_db
+  path, DRY, SecretStr), then a web UI. [testing DONE: pytest + TestClient,
+  3 tests (root, 422 validation, mocked /ask); logging DONE.]
 
 ## Status
 - Started on: 2026-06-22
