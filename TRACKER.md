@@ -10,9 +10,9 @@
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: web UI (form -> /ask -> rendered answer; client/server boundary).
-  Parked cleanups: DRY shared policy-loading/prompt across backends, SecretStr
-  for the key. [chroma_db path fix DONE; DI DONE; testing DONE; logging DONE.]
+- Next action: Phase 3 wrap-up + decide Phase 4 (Docker/deploy) vs parked
+  cleanups (DRY shared policy-loading/prompt, SecretStr). [web UI DONE;
+  chroma_db path fix DONE; DI DONE; testing DONE; logging DONE.]
 
 ## Status
 - Started on: 2026-06-22
@@ -21,6 +21,13 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-18 — Phase 3 web UI: passed the client/server-boundary gate (HTTP+JSON
+  crosses the boundary; chose static-frontend+fetch over server-rendered to keep
+  /ask reusable; understood same-origin vs CORS). Built app/static/index.html
+  (form -> fetch('/ask') -> render, with empty/thinking/error states); mounted via
+  StaticFiles at /static (html=True, __file__-anchored dir) so UI is additive —
+  / health + /ask contract + tests untouched. Verified live in browser: "Is fire
+  damage covered?" -> grounded home-policy answer. Operator typed the mount. — verified yes
 - 2026-07-18 — Phase 3 DI refactor: endpoint receives backend via FastAPI
   Depends(get_backend); get_backend is lazy + @lru_cache (built once, on first
   real request — not at import); backend imports deferred into _create_backend

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Policy Q&A</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 640px;
+      margin: 3rem auto;
+      padding: 0 1rem;
+      color: #1a1a1a;
+    }
+    h1 { font-size: 1.4rem; }
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 0.6rem;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 0.6rem;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+    #answer {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f4f4f5;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      min-height: 1rem;
+    }
+    .error { color: #b91c1c; }
+    .muted { color: #6b7280; }
+  </style>
+</head>
+<body>
+  <h1>Policy Q&amp;A</h1>
+  <p class="muted">Ask a question about the insurance policies.</p>
+
+  <textarea id="question" placeholder="e.g. Is theft covered?"></textarea>
+  <button id="ask">Ask</button>
+
+  <div id="answer"></div>
+
+  <script>
+    const questionEl = document.getElementById("question");
+    const askBtn = document.getElementById("ask");
+    const answerEl = document.getElementById("answer");
+
+    async function ask() {
+      const question = questionEl.value.trim();
+      if (!question) {
+        answerEl.textContent = "Please type a question.";
+        answerEl.className = "muted";
+        return;
+      }
+
+      askBtn.disabled = true;
+      answerEl.textContent = "Thinking…";
+      answerEl.className = "muted";
+
+      try {
+        // Same-origin call to the JSON API — same shape as the curl request.
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Server returned " + res.status);
+        }
+
+        const data = await res.json();
+        answerEl.textContent = data.answer;
+        answerEl.className = "";
+      } catch (err) {
+        answerEl.textContent = "Something went wrong: " + err.message;
+        answerEl.className = "error";
+      } finally {
+        askBtn.disabled = false;
+      }
+    }
+
+    askBtn.addEventListener("click", ask);
+    // Cmd/Ctrl+Enter to submit from the textarea.
+    questionEl.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") ask();
+    });
+  </script>
+</body>
+</html>
