@@ -1,11 +1,9 @@
-from fastapi import FastAPI
-
-from app.rag import ask_rag
+from fastapi import Depends, FastAPI
+from app.backends.base import RAGBackend
+from app.rag import get_backend
 from app.schemas import AskRequest, AskResponse
 
-
 app = FastAPI()
-
 
 @app.get("/")
 def read_root():
@@ -13,13 +11,10 @@ def read_root():
         "message": "Hello, RAG API"
     }
 
-
 @app.post("/ask", response_model=AskResponse)
 def ask_question(
     request: AskRequest,
+    backend: RAGBackend = Depends(get_backend),
 ) -> AskResponse:
-    result = ask_rag(request.question)
-
-    return AskResponse(
-        answer=result,
-    )
+    result = backend.answer(request.question)
+    return AskResponse(answer=result)

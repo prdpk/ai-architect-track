@@ -10,11 +10,9 @@
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: DI refactor (FastAPI Depends) — inject the backend so tests
-  override it with a fake (no real pipeline build); also makes the build lazy
-  (fixes the ~17s test import). Then minor cleanups (anchor manual chroma_db
-  path, DRY, SecretStr), then a web UI. [testing DONE: pytest + TestClient,
-  3 tests (root, 422 validation, mocked /ask); logging DONE.]
+- Next action: minor cleanups (anchor manual chroma_db path, DRY shared
+  policy-loading/prompt, SecretStr for the key), then a web UI. [DI DONE;
+  testing DONE; logging DONE.]
 
 ## Status
 - Started on: 2026-06-22
@@ -23,6 +21,14 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-18 — Phase 3 DI refactor: endpoint receives backend via FastAPI
+  Depends(get_backend); get_backend is lazy + @lru_cache (built once, on first
+  real request — not at import); backend imports deferred into _create_backend
+  so importing app pulls no torch. Tests override the seam via
+  app.dependency_overrides → real pipeline never builds. Diagnosed the 17s: TWO
+  costs — import-time build (fixed by DI) AND pytest walking scripts/test_*.py
+  (Phase 2 experiments) which loaded a CrossEncoder at import; bounded discovery
+  with pytest.ini testpaths=tests. Result: 17s → 0.12s. — verified yes
 - 2026-07-11 — Phase 3 config + swappable backend: passed config gate (secrets
   out of code; externalize knobs). app/config.py (Pydantic BaseSettings, Literal
   backend, validation_alias for key). Refactored RAG into app/backends/ strategy
