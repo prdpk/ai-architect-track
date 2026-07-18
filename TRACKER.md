@@ -10,9 +10,9 @@
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: minor cleanups (anchor manual chroma_db path, DRY shared
-  policy-loading/prompt, SecretStr for the key), then a web UI. [DI DONE;
-  testing DONE; logging DONE.]
+- Next action: web UI (form -> /ask -> rendered answer; client/server boundary).
+  Parked cleanups: DRY shared policy-loading/prompt across backends, SecretStr
+  for the key. [chroma_db path fix DONE; DI DONE; testing DONE; logging DONE.]
 
 ## Status
 - Started on: 2026-06-22

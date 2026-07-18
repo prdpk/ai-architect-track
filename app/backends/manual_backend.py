@@ -36,9 +36,16 @@ class ManualRAG(RAGBackend):
                 f"{policies_dir}"
             )
 
-        # Create the persistent ChromaDB client and collection
+        # Create the persistent ChromaDB client and collection.
+        # Anchor the path to the repo root (same base as policies_dir) so the DB
+        # location does not depend on the process's current working directory.
+        chroma_path = (
+            Path(__file__).resolve().parent.parent.parent
+            / "chroma_db"
+        )
+
         self.db = chromadb.PersistentClient(
-            path="./chroma_db"
+            path=str(chroma_path)
         )
 
         self.collection = self.db.get_or_create_collection(
