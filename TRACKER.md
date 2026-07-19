@@ -4,18 +4,20 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 4 — Cloud + deployment (IN PROGRESS). Containerization DONE.
+- Phase: 4 — Cloud + deployment (IN PROGRESS). DEPLOYED to AWS EC2 (live).
 - Last done: config layer (app/config.py, Pydantic BaseSettings, .env) +
   SWAPPABLE backend (strategy pattern): app/backends/base.py interface (ABC),
   langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
   Both consume settings; api_key passed explicitly. One /ask endpoint, engine
   swaps via config.
-- Next action: Phase 4 deploy — DECIDE cloud (AWS vs Azure), then deploy the
-  container; after that CI/CD + basic monitoring. Docker install note: macOS
-  Ventura can't run current Docker Desktop (needs Sonoma) → using Colima
-  (4 CPU / 4 GB VM) + docker CLI. Parked: DRY, SecretStr, pre-bake embedding
-  model into image (first /ask was 42s: runtime model download). [containerize
-  DONE; web UI DONE; DI DONE; testing DONE; logging DONE.]
+- Next action: Phase 4 remainder — HTTPS + domain (currently http://IP, "Not
+  Secure"), CI/CD (auto build->push->deploy), basic monitoring. COST: EC2
+  t4g.medium (~$0.80/day) is billing while Running — STOP or TERMINATE when not
+  demoing. Parked: DRY, SecretStr, pre-bake embedding model (first /ask ~40s on
+  EC2 too: runtime model download), move secret to Secrets Manager/SSM (currently
+  a .env on the box). [DEPLOY DONE; containerize DONE; web UI/DI/testing/logging DONE.]
+- Live (while Running): http://3.228.17.62:8000/static/  (EC2 i-0ee5e2a7954a9d06b,
+  us-east-1, arm64 t4g.medium; ECR 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa)
 
 ## Status
 - Started on: 2026-06-22
@@ -24,6 +26,26 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-07-19 — Phase 4 DEPLOYED to AWS (production proof): pushed policy-qa image
+  to ECR, launched EC2 (t4g.medium arm64 Amazon Linux 2023, 30GB, SG: SSH=MyIP,
+  8000=public), SSH'd in, installed Docker, attached IAM ROLE (ECR read-only) to
+  the instance so it pulls without keys on the box, docker pull + run with key via
+  .env. Live and reachable from any browser at http://3.228.17.62:8000/static/ —
+  grounded theft answer served from AWS. Learned/hit: image CPU-arch must match host
+  (arm64 image -> Graviton t4g, not t3/x86); CLI-vs-Console on different AWS accounts
+  (standardized on 771362852530, made an IAM user policy-qa-deployer instead of root);
+  IAM role for EC2 = temp rotating creds vs long-lived keys; security groups as
+  firewall (SSH restricted, app public). Operator drove every console step. — verified yes
+- 2026-07-19 — Phase 4 Docker CONCEPTS session (no new code; understanding gate):
+  operator flagged they didn't understand the containerization done for them, so
+  stopped and rebuilt the mental model from scratch. Now solid on: Docker = CLI +
+  engine (in Colima Linux VM on Mac); image = frozen file (OS userland + deps +
+  code, NO kernel) vs container = image running as isolated process sharing host
+  kernel; build (bakes code in) vs run; base image (python:3.13-slim) + layer
+  stacking/sharing; -p HOST:CONTAINER port mapping (app owns container port via
+  CMD); runtime secret injection via --env-file (key out of image) + limits
+  (visible via exec/inspect → prod uses secret managers). Given 2 verified Docker
+  docs links. Reasoned, not memorized. — verified yes
 - 2026-07-18 — Phase 4 containerization: passed the Docker gate (container vs VM:
   shares host kernel, lighter, weaker isolation; bake code/deps into image, inject
   secrets at runtime). Wrote Dockerfile (python:3.13-slim, layer-cache order:
