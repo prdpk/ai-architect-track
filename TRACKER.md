@@ -4,18 +4,14 @@
 > state CT and chat-Claude drive from — if it isn't written here, it didn't happen.
 
 ## Now
-- Phase: 4 — Cloud + deployment (IN PROGRESS). DEPLOYED to AWS EC2 (live).
-- Last done: config layer (app/config.py, Pydantic BaseSettings, .env) +
-  SWAPPABLE backend (strategy pattern): app/backends/base.py interface (ABC),
-  langchain_backend.py + manual_backend.py, selected by settings.rag_backend.
-  Both consume settings; api_key passed explicitly. One /ask endpoint, engine
-  swaps via config.
-- Next action: Phase 4 remainder — HTTPS + domain (currently http://IP, "Not
-  Secure"), CI/CD (auto build->push->deploy), basic monitoring. COST: EC2
-  t4g.medium (~$0.80/day) is billing while Running — STOP or TERMINATE when not
-  demoing. Parked: DRY, SecretStr, pre-bake embedding model (first /ask ~40s on
-  EC2 too: runtime model download), move secret to Secrets Manager/SSM (currently
-  a .env on the box). [DEPLOY DONE; containerize DONE; web UI/DI/testing/logging DONE.]
+- Phase: 4 COMPLETE → Phase 5 next (system design & architecture).
+- Last done: CI/CD pipeline (GitHub Actions: arm64 build → ECR push → SSH
+  deploy), CloudWatch logging (awslogs driver → /policy-qa log group),
+  CloudWatch alarm (StatusCheckFailed_Instance → SNS email policy-qa-alerts).
+- Next action: START PHASE 5 — build PHASE5.md syllabus first (per PLAN.md
+  coverage commitment), then begin system-design vocabulary + spine re-arch.
+  COST: EC2 t4g.medium (~$0.80/day) — STOP when not demoing. Parked: HTTPS/
+  domain (Phase 6), SecretStr, pre-bake embedding model, Secrets Manager/SSM.
 - Live (while Running): http://100.60.143.131:8000/static/  (EC2 i-0ee5e2a7954a9d06b,
   us-east-1, arm64 t4g.medium; Elastic IP 100.60.143.131 eipalloc-0f7bb64f3bfc92fb5;
   ECR 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa)
@@ -27,6 +23,15 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-08-01 — Phase 4 COMPLETE: CI/CD pipeline (GitHub Actions, arm64 QEMU
+  build → ECR push → SSH deploy via appleboy/ssh-action), CloudWatch logs
+  (awslogs Docker driver → /policy-qa log group, auto-created), CloudWatch
+  alarm (StatusCheckFailed_Instance ≥1 → SNS email on policy-qa-alerts).
+  Elastic IP 100.60.143.131 allocated and associated (static address). Learned:
+  needs: gate (deploy skips on build failure), awslogs driver decouples log
+  lifetime from container lifetime, IAM role on EC2 = no keys for CloudWatch
+  write. EC2 SSH key issue diagnosed + fixed via EC2 Instance Connect browser
+  + new ed25519 key pair. — verified yes
 - 2026-07-19 — Phase 4 DEPLOYED to AWS (production proof): pushed policy-qa image
   to ECR, launched EC2 (t4g.medium arm64 Amazon Linux 2023, 30GB, SG: SSH=MyIP,
   8000=public), SSH'd in, installed Docker, attached IAM ROLE (ECR read-only) to
