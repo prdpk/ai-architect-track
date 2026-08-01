@@ -59,4 +59,8 @@ jobs:
               -p 8000:8000 \
               --env-file /home/ec2-user/.env \
               --restart unless-stopped \
+              --log-driver=awslogs \
+              --log-opt awslogs-region=us-east-1 \
+              --log-opt awslogs-group=/policy-qa \
+              --log-opt awslogs-create-group=true \
               771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa:latest
