@@ -16,8 +16,9 @@
   demoing. Parked: DRY, SecretStr, pre-bake embedding model (first /ask ~40s on
   EC2 too: runtime model download), move secret to Secrets Manager/SSM (currently
   a .env on the box). [DEPLOY DONE; containerize DONE; web UI/DI/testing/logging DONE.]
-- Live (while Running): http://3.228.17.62:8000/static/  (EC2 i-0ee5e2a7954a9d06b,
-  us-east-1, arm64 t4g.medium; ECR 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa)
+- Live (while Running): http://100.60.143.131:8000/static/  (EC2 i-0ee5e2a7954a9d06b,
+  us-east-1, arm64 t4g.medium; Elastic IP 100.60.143.131 eipalloc-0f7bb64f3bfc92fb5;
+  ECR 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa)
 
 ## Status
 - Started on: 2026-06-22
