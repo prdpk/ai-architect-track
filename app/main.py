@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from fastapi import Depends, FastAPI
 from app.backends.base import RAGBackend
 from app.rag import get_backend
 from app.schemas import AskRequest, AskResponse
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -21,5 +24,6 @@ def ask_question(
     request: AskRequest,
     backend: RAGBackend = Depends(get_backend),
 ) -> AskResponse:
+    logger.info("Question: %s", request.question)
     result = backend.answer(request.question)
     return AskResponse(answer=result)
