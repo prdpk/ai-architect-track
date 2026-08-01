@@ -8,12 +8,22 @@
 
 ## How Phase 5 runs
 
-- Learn the concept → explain it in your own words (gate) → build or defend it.
+- Learn the concept -> explain it in your own words (gate) -> build or defend it.
 - Every SPINE topic produces a real code change + an ADR in docs/.
 - Every SPIKE produces a throwaway script + 1 paragraph: "when I'd use this
   and when I wouldn't."
 - STUDY topics end in a verbal defence (quiz with CT).
-- Final deliverable: a "scale this to 10× users" design doc for the spine app.
+- SEQUENCE: vocabulary-first. Block 1 before anything else, then proceed in order.
+- Final deliverables: (1) a "scale this to 10x users" design doc for the spine
+  app, and (2) the AI-analytics-SaaS design-on-paper case study (see end).
+
+## Honest depth calibration (read once)
+- SPINE = real hands-on depth on the app.
+- SPIKE = touched, working, tradeoff-articulable — NOT production-specialist.
+- STUDY = decide + defend, no build.
+- "Learning it all for real" = the above, per track. It does NOT mean operating
+  every technology in production like a specialist. Nobody clears that bar and
+  the architect role does not require it. Depth accrues later, on real jobs.
 
 ---
 
@@ -50,7 +60,7 @@
 | 3.2 | gRPC vs REST vs GraphQL — tradeoffs, when each fits | STUDY | Can say when you'd replace our REST endpoint with gRPC |
 | 3.3 | Message queues — producer/consumer, at-least-once vs exactly-once | SPIKE | Tiny SQS or RabbitMQ demo: send a "question" message, consume + log it |
 | 3.4 | Event-driven architecture — events vs commands, eventual consistency | STUDY | Can explain how /ask could become event-driven and what that buys |
-| 3.5 | Pub/sub — fan-out, topic vs queue semantics | STUDY | Can distinguish SQS (queue) from SNS (pub/sub) — we already used SNS |
+| 3.5 | Pub/sub — fan-out, topic vs queue semantics | STUDY | Can distinguish SQS (queue) from SNS (pub/sub) [VERIFY: confirm we actually used SNS in Phase 4 before relying on this] |
 
 ---
 
@@ -118,7 +128,7 @@
 |---|-------|-------|----------|
 | 9.1 | Monolith vs modular monolith vs microservices — the spectrum | STUDY | Can place our app on the spectrum and explain the forcing functions to move right |
 | 9.2 | Event sourcing — append-only log as source of truth, replay | STUDY | Can explain event sourcing for a trades ledger and the audit trail benefit |
-| 9.3 | Saga pattern — distributed transactions without a 2PC lock | STUDY | Can describe a saga for a multi-step leaver process (trigger → confirm → archive) |
+| 9.3 | Saga pattern — distributed transactions without a 2PC lock | STUDY | Can describe a saga for a multi-step leaver process (trigger -> confirm -> archive) |
 | 9.4 | Strangler fig — incremental migration from monolith | STUDY | Can explain how to extract the /ask endpoint from a hypothetical monolith |
 | 9.5 | ADRs + C4 diagrams — how architects document decisions and communicate systems | SPINE | Write 2 ADRs for decisions already made (RAG backend choice, Docker deploy) |
 
@@ -136,19 +146,66 @@
 
 ---
 
-## Final deliverable — "Scale this to 10×" design doc
+## Block 11 — Infrastructure Spikes (breadth: your explicit list)
 
-Write a design doc answering: *our app currently handles ~10 queries/day on one
-EC2. Design it for 10,000 queries/day.* Cover:
+Heavy patterns that do NOT fit the single spine app. Learned as ISOLATED spikes
+or study, NEVER force-fit onto the policy-QA app. The rule: our app is one
+low-traffic container — it genuinely needs NONE of these, and being able to say
+"this doesn't need K8s, here's why" IS the architect skill being graded.
+
+| # | Topic | Track | Done bar |
+|---|-------|-------|----------|
+| 11.1 | Containers at scale / Kubernetes — pods, services, deployments, when it's overkill | SPIKE | Deploy 2 dummy containers to a local cluster (kind/minikube); see pods+service route traffic. Paragraph: what K8s solves + why our app does NOT need it |
+| 11.2 | VPC / networking — subnets (public vs private), route tables, security groups | STUDY | Can draw a VPC with public+private subnets and place our EC2 correctly; explain what's exposed |
+| 11.3 | NAT gateway — why private-subnet resources need it, and what it costs | STUDY | Can explain why NAT exists and why adding it "to look real" is a cost trap for our app |
+| 11.4 | Load balancer (hands-on) — optional spike on top of 5.1 | SPIKE (optional) | 2 dummy instances behind an ALB; watch traffic distribute. Only if time allows |
+
+---
+
+## Final deliverables (these prove Phase 5)
+
+### Deliverable 1 — "Scale this to 10x" design doc (the spine)
+Our app currently handles ~10 queries/day on one EC2. Design it for 10,000/day.
+Cover:
 - Where it breaks first (SPOF, bottleneck)
 - What you'd change and why (load balancer, caching, async queue, read replica)
-- What you'd NOT change yet and why
+- What you'd NOT change yet and why (the restraint — the architect signal)
 - Two ADRs for the biggest decisions made
 
-This is the portfolio artefact that proves Phase 5.
+### Deliverable 2 — AI-analytics-SaaS design case study (PAPER ONLY — do NOT build)
+Architect (on paper) an AI analytics SaaS: text-to-SQL over structured business
+data (LLM -> NL-to-SQL -> execute -> LLM explains), with RAG used for SCHEMA /
+semantic-layer retrieval (NOT row data), multi-tenancy, ingestion (messy Excel)
+OR connect-to-existing-DB as a smaller wedge, SQL validation, cost, security,
+and where AI must NOT decide. Produce: component diagram, data flow, key
+tradeoffs, 1-2 ADRs.
+- Purpose here = architecture reps + a portfolio case study + pressure-testing
+  the idea's real complexity. It is NOT a product build.
+- BUILD-OR-NOT decision is PARKED until after Phase 6. Before any commercial
+  build: (1) check SS&C employment contract (moonlighting/IP/conflict),
+  (2) validate the "connect to existing DB" wedge with a few real users,
+  (3) confirm the plan is finished first. Do NOT let this replace the plan.
+
+---
+
+## Carried decisions / parked items
+
+- ML System Design (interview genre): parked — decide vs target roles.
+- DSA sprint: only if a target company screens for it.
+- Geo + cert target: decide at Phase 6.
+- PHASE 6 OPTIONAL CERT: Claude Certified Architect – Foundations (Anthropic,
+  verified real). Vendor-specific (certifies the AI layer, ~20% of the general
+  architect target) — complements, does NOT replace, general system-design proof.
+  Low marginal cost (plan already covers most). Decide in Phase 6 with the
+  geo/cert call. Resources: anthropic.skilljar.com (free courses);
+  github.com/anthropics/claude-cookbooks; modelcontextprotocol.io;
+  platform.claude.com/docs; anthropic-partners.skilljar.com (exam blueprint /
+  register — may be partner-network-gated, verify access at Phase 6);
+  claude.com/partners.
 
 ---
 
 ## Tracking
 
 Mark each row DONE as it's completed. Update TRACKER.md at end of each session.
+Sequence is vocabulary-first: Block 1 fully before moving on, then in order.
