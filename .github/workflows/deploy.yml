@@ -51,13 +51,26 @@ jobs:
             aws ecr get-login-password --region us-east-1 | \
               docker login --username AWS --password-stdin \
               771362852530.dkr.ecr.us-east-1.amazonaws.com
+
+            # Ensure network exists
+            docker network create policy-qa-net 2>/dev/null || true
+
+            # Ensure Redis is running on the network
+            docker start redis 2>/dev/null || \
+              docker run -d --name redis \
+                --network policy-qa-net \
+                --restart unless-stopped \
+                redis:alpine
+
             docker pull 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa:latest
             docker stop policy-qa || true
             docker rm policy-qa || true
             docker run -d \
               --name policy-qa \
+              --network policy-qa-net \
               -p 8000:8000 \
               --env-file /home/ec2-user/.env \
+              -e REDIS_HOST=redis \
               --restart unless-stopped \
               --log-driver=awslogs \
               --log-opt awslogs-region=us-east-1 \
