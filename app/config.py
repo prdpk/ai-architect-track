@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    cache_ttl: int = 3600
 
 settings = Settings()
 
