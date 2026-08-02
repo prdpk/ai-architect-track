@@ -8,10 +8,8 @@
 - Last done: CI/CD pipeline (GitHub Actions: arm64 build → ECR push → SSH
   deploy), CloudWatch logging (awslogs driver → /policy-qa log group),
   CloudWatch alarm (StatusCheckFailed_Instance → SNS email policy-qa-alerts).
-- Next action: START PHASE 5 — build PHASE5.md syllabus first (per PLAN.md
-  coverage commitment), then begin system-design vocabulary + spine re-arch.
-  COST: EC2 t4g.medium (~$0.80/day) — STOP when not demoing. Parked: HTTPS/
-  domain (Phase 6), SecretStr, pre-bake embedding model, Secrets Manager/SSM.
+- Next action: Phase 5 Block 2 — Data Layer (2.1 SQL vs NoSQL, through 2.6 CDN).
+  Block 1 foundations complete. COST: EC2 stopped — start only when demoing.
 - Live (while Running): http://100.60.143.131:8000/static/  (EC2 i-0ee5e2a7954a9d06b,
   us-east-1, arm64 t4g.medium; Elastic IP 100.60.143.131 eipalloc-0f7bb64f3bfc92fb5;
   ECR 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa)
@@ -23,6 +21,15 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-08-02 — Phase 5 Block 1 DONE (5 STUDY topics, all verbal-defence passed):
+  sync vs async (server thread blocks on Anthropic call; async def + await =
+  worker suspends, handles other requests); stateless vs stateful (no per-client
+  memory; state externalised to Redis/DB for horizontal scale); horizontal vs
+  vertical scaling (vertical: hardware ceiling + cost curve + downtime; horizontal:
+  additive, load balanced); CAP theorem (partition tolerance = baseline; real
+  choice is CP vs AP; single-node Chroma is outside CAP — no distribution);
+  latency vs throughput (batching improves throughput, increases per-user latency).
+  — verified yes
 - 2026-08-01 — Phase 4 COMPLETE: CI/CD pipeline (GitHub Actions, arm64 QEMU
   build → ECR push → SSH deploy via appleboy/ssh-action), CloudWatch logs
   (awslogs Docker driver → /policy-qa log group, auto-created), CloudWatch
