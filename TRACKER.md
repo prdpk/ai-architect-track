@@ -8,8 +8,9 @@
 - Last done: CI/CD pipeline (GitHub Actions: arm64 build → ECR push → SSH
   deploy), CloudWatch logging (awslogs driver → /policy-qa log group),
   CloudWatch alarm (StatusCheckFailed_Instance → SNS email policy-qa-alerts).
-- Next action: Phase 5 Block 2 — Data Layer (2.1 SQL vs NoSQL, through 2.6 CDN).
-  Block 1 foundations complete. COST: EC2 stopped — start only when demoing.
+- Next action: Phase 5 Block 3 — Communication Patterns (3.1 REST design
+  through 3.5 Pub/sub). Blocks 1+2 complete. Working on dev branch; merge to
+  main to deploy. COST: EC2 stopped — start only when demoing.
 - Live (while Running): http://100.60.143.131:8000/static/  (EC2 i-0ee5e2a7954a9d06b,
   us-east-1, arm64 t4g.medium; Elastic IP 100.60.143.131 eipalloc-0f7bb64f3bfc92fb5;
   ECR 771362852530.dkr.ecr.us-east-1.amazonaws.com/policy-qa)
@@ -21,6 +22,17 @@
 
 ## Done log
 (newest first — one line each: date — what shipped — verified yes/no)
+- 2026-08-03 — Phase 5 Block 2 DONE (Data Layer — all 6 topics):
+  SQL vs NoSQL (Postgres for financial data: ACID + relational integrity;
+  NoSQL for schema fluidity + write throughput); indexing (composite index on
+  user_id+created_at; B-tree lookup vs full scan; write overhead per mutation);
+  sharding (hot-key = institutional client on one shard; fix = dedicated shard
+  or better key); replication (replication lag = stale read = eventual
+  consistency; read-your-writes pattern); caching SPINE — Redis cache-aside
+  implemented on /ask (SHA256 cache key, 1h TTL, graceful fallback, test
+  isolation via conftest mock; caught real bug: tests polluting prod cache);
+  CDN (static assets yes, /ask no — CDN caches by URL, Redis caches by
+  semantic key). Dev branch created; deploy triggers on main only. — verified yes
 - 2026-08-02 — Phase 5 Block 1 DONE (5 STUDY topics, all verbal-defence passed):
   sync vs async (server thread blocks on Anthropic call; async def + await =
   worker suspends, handles other requests); stateless vs stateful (no per-client
