@@ -2,210 +2,282 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Phase 5 Cheat Sheet — Blocks 1 & 2</title>
+<title>Phase 5 Cheat Sheet — Blocks 1 &amp; 2</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 11px;
+    font-size: 13px;
     color: #111;
     background: #fff;
-    padding: 18px 22px;
   }
 
-  h1 {
-    font-size: 15px;
-    font-weight: 700;
-    text-align: center;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 14mm 16mm 10mm;
+    page-break-after: always;
   }
 
-  .subtitle {
-    text-align: center;
-    font-size: 10px;
-    color: #555;
+  .page:last-child { page-break-after: avoid; }
+
+  /* ── Header ── */
+  .page-header {
+    border-bottom: 3px solid #111;
+    padding-bottom: 6px;
     margin-bottom: 14px;
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .page-header h1 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
   }
 
-  .block {
-    border: 1.5px solid #333;
-    border-radius: 5px;
-    overflow: hidden;
+  .page-header .meta {
+    font-size: 11px;
+    color: #555;
+    margin-top: 2px;
   }
 
-  .block-title {
-    background: #222;
-    color: #fff;
-    font-size: 10.5px;
+  /* ── Topic card ── */
+  .topic {
+    border-left: 4px solid #222;
+    padding: 8px 0 8px 12px;
+    margin-bottom: 12px;
+  }
+
+  .topic-label {
+    font-size: 10px;
     font-weight: 700;
-    padding: 4px 8px;
-    letter-spacing: 0.3px;
     text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+    margin-bottom: 3px;
   }
-
-  .qa {
-    padding: 5px 8px 4px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  .qa:last-child { border-bottom: none; }
 
   .q {
+    font-size: 14px;
     font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 2px;
-    line-height: 1.35;
+    color: #000;
+    margin-bottom: 6px;
+    line-height: 1.3;
   }
 
   .a {
-    color: #333;
-    line-height: 1.4;
+    font-size: 13px;
+    color: #222;
+    line-height: 1.6;
   }
 
-  .tag {
+  .a strong { color: #000; }
+
+  .a ul {
+    margin: 4px 0 4px 16px;
+  }
+
+  .a ul li { margin-bottom: 2px; }
+
+  .rule {
     display: inline-block;
-    font-size: 9px;
-    font-weight: 700;
-    background: #f0f0f0;
-    border: 1px solid #bbb;
-    border-radius: 3px;
-    padding: 0 4px;
-    margin-right: 4px;
-    vertical-align: middle;
-    color: #444;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 5px;
   }
 
-  em { font-style: normal; font-weight: 700; color: #000; }
+  .divider {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 4px 0 10px;
+  }
 
+  /* ── Print ── */
   @media print {
-    body { padding: 10px 14px; }
-    @page { margin: 0.5cm; size: A4; }
+    body { background: #fff; }
+    .page { padding: 10mm 14mm 8mm; }
+    @page { size: A4 portrait; margin: 0; }
   }
 </style>
 </head>
 <body>
 
-<h1>System Design Cheat Sheet — Phase 5 Blocks 1 &amp; 2</h1>
-<p class="subtitle">AI Architect Learning Track &nbsp;|&nbsp; Read once daily &nbsp;|&nbsp; If you can answer every Q without looking, you own it.</p>
+<!-- ═══════════════ PAGE 1 — BLOCK 1: FOUNDATIONS ═══════════════ -->
+<div class="page">
 
-<div class="grid">
-
-  <!-- BLOCK 1 -->
-  <div class="block">
-    <div class="block-title">Block 1 — Foundations</div>
-
-    <div class="qa">
-      <div class="q">Sync vs Async — what's different on the server?</div>
-      <div class="a">
-        <em>Sync (def):</em> worker thread blocks for the full I/O wait (our Anthropic call ~2–10s). Can't serve other requests during that time.<br>
-        <em>Async (async def + await):</em> worker suspends at the await, event loop picks up the next request, resumes when I/O completes. Same worker, many concurrent requests.
-      </div>
-    </div>
-
-    <div class="qa">
-      <div class="q">Stateless vs Stateful — and why does it matter for scaling?</div>
-      <div class="a">
-        <em>Stateless:</em> no per-client memory in the process. Every request is self-contained — any instance can handle it. Our FastAPI app is stateless.<br>
-        <em>Stateful:</em> session data kept in-process (e.g. conversation history). Breaks horizontal scaling — requests must stick to the same instance.<br>
-        <em>Fix:</em> externalise state (Redis, DB) so any instance reads it.
-      </div>
-    </div>
-
-    <div class="qa">
-      <div class="q">Horizontal vs Vertical scaling — limits?</div>
-      <div class="a">
-        <em>Vertical:</em> bigger machine (more CPU/RAM). Limits: hardware ceiling, cost curve (2× size ≠ 2× perf, often &gt;2× cost), requires downtime to resize.<br>
-        <em>Horizontal:</em> more instances + load balancer. Limits: app must be stateless; adds network/coordination complexity.
-      </div>
-    </div>
-
-    <div class="qa">
-      <div class="q">CAP Theorem — what's the real choice?</div>
-      <div class="a">
-        <em>C:</em> every read sees the latest write. &nbsp;<em>A:</em> every request gets a response. &nbsp;<em>P:</em> system works despite network splits.<br>
-        P is unavoidable in any distributed system (networks fail). Real choice: <em>CP</em> (reject requests until replicas sync) vs <em>AP</em> (respond with possibly stale data).<br>
-        Single-node Chroma: CAP doesn't apply — no distribution, no partition.
-      </div>
-    </div>
-
-    <div class="qa">
-      <div class="q">Latency vs Throughput — can you improve one without hurting the other?</div>
-      <div class="a">
-        <em>Latency:</em> time for one request. &nbsp;<em>Throughput:</em> requests completed per second.<br>
-        Often trade against each other. Example: batching LLM calls improves throughput (more work per API call) but increases per-user latency (wait for batch to fill).
-      </div>
-    </div>
-
+  <div class="page-header">
+    <h1>Block 1 — Foundations</h1>
+    <div class="meta">Phase 5 System Design &nbsp;·&nbsp; AI Architect Learning Track &nbsp;·&nbsp; Read daily — cover the Q, recall the answer, then check.</div>
   </div>
 
-  <!-- BLOCK 2 -->
-  <div class="block">
-    <div class="block-title">Block 2 — Data Layer</div>
-
-    <div class="qa">
-      <div class="q">SQL vs NoSQL — when do you pick each?</div>
-      <div class="a">
-        <em>SQL (Postgres):</em> structured schema, relationships matter, ACID transactions required → financial data, trades, ledgers.<br>
-        <em>NoSQL:</em> schema changes frequently, minimal joins, need horizontal write scale → event logs, product catalogs, sessions.<br>
-        NoSQL ≠ no consistency — DynamoDB has transactions, just opt-in.
-      </div>
+  <div class="topic">
+    <div class="topic-label">1.1 &nbsp;·&nbsp; Study</div>
+    <div class="q">Sync vs Async — what actually changes on the server?</div>
+    <div class="a">
+      <strong>Sync (plain def):</strong> the worker thread is blocked for the entire duration of every I/O call. Our <code>/ask</code> calls Anthropic (~2–10 s wait). During that wait, the thread sits idle — it cannot serve another request. 10 concurrent users = 10 blocked threads.<br><br>
+      <strong>Async (async def + await):</strong> the worker hits an <code>await</code> (e.g. waiting for Anthropic), suspends the coroutine, and the event loop immediately picks up another incoming request. When Anthropic replies, the coroutine resumes. One worker can handle many concurrent I/O-bound requests.<br><br>
+      <span class="rule">Key insight: async is most valuable when the bottleneck is waiting on I/O (network, DB), not CPU. Our app is almost pure I/O-wait — ideal candidate.</span>
     </div>
+  </div>
 
-    <div class="qa">
-      <div class="q">Indexing — what does it cost?</div>
-      <div class="a">
-        An index lets the DB jump to rows instead of full-table scanning.<br>
-        Composite example: <em>(user_id, created_at DESC)</em> — lookup by user + pre-sorted, no extra sort step.<br>
-        <em>Cost:</em> extra storage + every INSERT/UPDATE/DELETE must update the index. Over-indexing slows writes.
-      </div>
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">1.2 &nbsp;·&nbsp; Study</div>
+    <div class="q">Stateless vs Stateful — why does it control horizontal scaling?</div>
+    <div class="a">
+      <strong>Stateless:</strong> the process keeps no per-user memory between requests. Every request is fully self-contained — any instance can handle it. Our FastAPI app is stateless: no session data in memory.<br><br>
+      <strong>Stateful:</strong> user-specific data lives inside the process (e.g., in-memory conversation history). Requests must go to the same instance (sticky sessions). Adding a second instance doesn't help — users are pinned to one.<br><br>
+      <strong>The fix:</strong> externalise state to Redis or a database. Now every instance reads from the same store → true horizontal scale.<br><br>
+      <span class="rule">Architect rule: if you can't kill any instance and restart it without losing anything, your service is stateful.</span>
     </div>
+  </div>
 
-    <div class="qa">
-      <div class="q">Sharding — what is the hot-key problem?</div>
-      <div class="a">
-        Sharding splits data across DB instances by a shard key. Hot-key: one key (e.g. a single institutional client) generates disproportionate traffic → one shard overloaded, others idle.<br>
-        <em>Fixes:</em> better shard key, dedicated shard for high-volume accounts, splitting read/write workloads.
-      </div>
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">1.3 &nbsp;·&nbsp; Study</div>
+    <div class="q">Horizontal vs Vertical scaling — where does vertical stop?</div>
+    <div class="a">
+      <strong>Vertical (scale up):</strong> give the single machine more CPU, RAM, or disk. Simple — no code change. But: hardware has an absolute ceiling; 2× machine size rarely gives 2× performance and often costs &gt;2×; resizing requires downtime.<br><br>
+      <strong>Horizontal (scale out):</strong> run N copies of the app behind a load balancer. No ceiling — keep adding instances. Requires the app to be stateless; adds operational complexity (service discovery, load balancing, distributed tracing).<br><br>
+      <span class="rule">In practice: vertical first (simple, fast), switch to horizontal when vertical becomes too expensive or hits the hardware limit.</span>
     </div>
+  </div>
 
-    <div class="qa">
-      <div class="q">Replication lag — what goes wrong?</div>
-      <div class="a">
-        Primary handles writes; read replicas catch up asynchronously. <em>Replication lag</em> = replica is temporarily behind primary.<br>
-        <em>Stale read:</em> user writes at T+0, reads replica at T+1, sees old data.<br>
-        <em>Fix for critical paths:</em> read from primary immediately after a write (<em>read-your-writes consistency</em>). Replicas are fine for reporting/analytics.
-      </div>
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">1.4 &nbsp;·&nbsp; Study</div>
+    <div class="q">CAP Theorem — what is the real architectural choice?</div>
+    <div class="a">
+      <strong>C — Consistency:</strong> every read returns the most recent write, regardless of which node handles it.<br>
+      <strong>A — Availability:</strong> every request gets a response (even if some nodes are down).<br>
+      <strong>P — Partition tolerance:</strong> the system continues operating when network splits disconnect nodes from each other.<br><br>
+      <strong>Why P is not optional:</strong> network failures are a physical reality in any distributed system. You cannot prevent partitions — you can only decide what to sacrifice when one occurs.<br><br>
+      <strong>Real choice → CP vs AP:</strong><br>
+      <ul>
+        <li><strong>CP:</strong> during a partition, reject requests until replicas sync. Data is always correct, but the service may be temporarily unavailable.</li>
+        <li><strong>AP:</strong> during a partition, keep responding, but some responses may be stale. Service stays up; consistency lags.</li>
+      </ul>
+      <span class="rule">Single-node Chroma: CAP does not apply. No distribution = no partitions = no trade-off to make.</span>
     </div>
+  </div>
 
-    <div class="qa">
-      <div class="q">Cache-aside pattern — 3 steps?</div>
-      <div class="a">
-        1. Check cache. Hit → return immediately (no backend, no LLM).<br>
-        2. Miss → call backend, get result.<br>
-        3. Store result in cache (with TTL), then return.<br>
-        <em>Key rule:</em> cache failure must never break the API — wrap in try/except.<br>
-        <em>Tests:</em> always mock the cache client — real Redis in tests pollutes prod cache keys.
-      </div>
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">1.5 &nbsp;·&nbsp; Study</div>
+    <div class="q">Latency vs Throughput — can you improve one without hurting the other?</div>
+    <div class="a">
+      <strong>Latency:</strong> time taken to complete one request, from the user's perspective (e.g. 2 s for one <code>/ask</code>).<br>
+      <strong>Throughput:</strong> number of requests the system completes per second (or per minute).<br><br>
+      They often trade against each other. <strong>Example — batching LLM calls:</strong> instead of calling Anthropic once per question, wait and batch 5 questions into one API call. The API call overhead is shared → throughput improves. But each individual user waits for the batch to fill → per-user latency increases.<br><br>
+      <span class="rule">Architect move: know which one your SLO cares about. Interactive UIs → optimise latency. Bulk pipelines → optimise throughput.</span>
     </div>
-
-    <div class="qa">
-      <div class="q">CDN — what can it cache and what can't it?</div>
-      <div class="a">
-        <em>Can cache:</em> static assets served identically to all users — HTML, JS, CSS, images. CDN edge node serves them without hitting your origin server.<br>
-        <em>Cannot cache:</em> dynamic API responses like <code>/ask</code> — response depends on the question, context, LLM output. Use Redis (app-layer) for that, not CDN.
-      </div>
-    </div>
-
   </div>
 
 </div>
+
+
+<!-- ═══════════════ PAGE 2 — BLOCK 2: DATA LAYER ═══════════════ -->
+<div class="page">
+
+  <div class="page-header">
+    <h1>Block 2 — Data Layer</h1>
+    <div class="meta">Phase 5 System Design &nbsp;·&nbsp; AI Architect Learning Track &nbsp;·&nbsp; Read daily — cover the Q, recall the answer, then check.</div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-label">2.1 &nbsp;·&nbsp; Study</div>
+    <div class="q">SQL vs NoSQL — when do you pick each for a financial platform?</div>
+    <div class="a">
+      <strong>SQL (Postgres):</strong> structured schema, relationships between entities, ACID transactions, foreign keys, joins. Right choice for trades, accounts, ledgers — correctness is non-negotiable.<br>
+      <strong>NoSQL (DynamoDB, MongoDB):</strong> schema changes frequently, few relationships, need massive horizontal write throughput or global distribution. Right for event logs, user activity, product catalogs.<br><br>
+      <span class="rule">NoSQL ≠ no consistency. DynamoDB has transactions and strong-consistency reads — they're just opt-in, not the default.</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">2.2 &nbsp;·&nbsp; Study</div>
+    <div class="q">Indexing — what does it actually do, and what does it cost?</div>
+    <div class="a">
+      Without an index, the DB scans every row (full table scan). An index is a separate B-tree data structure that maps column values → row locations, so the DB jumps directly to matching rows.<br><br>
+      <strong>Composite index example:</strong> <code>(user_id, created_at DESC)</code> for the query <code>WHERE user_id=X ORDER BY created_at DESC</code> — the index handles both the filter and the sort in one pass, no extra sort step.<br><br>
+      <strong>Cost:</strong> extra disk space + every INSERT, UPDATE, DELETE must also update the index. Too many indexes → writes slow down significantly.<br><br>
+      <span class="rule">Rule: index what you query frequently; audit and drop indexes that reads don't use.</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">2.3 &nbsp;·&nbsp; Study</div>
+    <div class="q">Sharding — what is the hot-key problem and how does it appear in finance?</div>
+    <div class="a">
+      Sharding splits data across multiple DB instances by a shard key (e.g. <code>user_id</code>). All data for one key goes to one shard.<br><br>
+      <strong>Hot-key problem:</strong> one key generates far more traffic than others. In a financial platform: a single institutional client executes millions of trades per day. All those writes route to one shard → that shard is overloaded while others are idle. Latency spikes and failures appear for that one client while others are fine.<br><br>
+      <strong>Fixes:</strong> choose a more evenly distributed shard key; dedicate a shard (or cluster) to high-volume accounts; split read and write workloads onto separate infrastructure.
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">2.4 &nbsp;·&nbsp; Study</div>
+    <div class="q">Replication lag — what is a stale read and when does it matter?</div>
+    <div class="a">
+      The primary DB handles all writes. Read replicas receive changes asynchronously — there is always a small delay (replication lag). During that window, a replica may serve old data.<br><br>
+      <strong>Stale read scenario:</strong> user submits a trade at T+0 (written to primary). They immediately query their trade history (routed to replica at T+1). The replica hasn't caught up — the trade is invisible. This is eventual consistency.<br><br>
+      <strong>Fixes:</strong>
+      <ul>
+        <li><strong>Read-your-writes consistency:</strong> always read from primary immediately after a write for that user.</li>
+        <li><strong>Replica for analytics only:</strong> reporting and dashboards can tolerate slight lag — route those queries to replicas and keep primary load low.</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">2.5 &nbsp;·&nbsp; SPINE (built)</div>
+    <div class="q">Cache-aside pattern — 3 steps, 2 rules?</div>
+    <div class="a">
+      <strong>3 steps:</strong>
+      <ul>
+        <li><strong>Check cache.</strong> Hit → return immediately. No backend call, no LLM, no cost.</li>
+        <li><strong>Miss → call backend.</strong> Get the real result the normal way.</li>
+        <li><strong>Store in cache (with TTL), then return.</strong> Next identical request hits step 1.</li>
+      </ul>
+      <strong>2 rules that matter in production:</strong>
+      <ul>
+        <li><strong>Cache failure must never break the API.</strong> Wrap every Redis call in try/except — if Redis is down, fall through to the backend.</li>
+        <li><strong>Tests must never touch real Redis.</strong> Mock the cache client in all tests or they pollute production cache keys (we hit this exact bug).</li>
+      </ul>
+      <span class="rule">Cache key = normalised (lowercased, stripped) question hashed with SHA256 so casing variants hit the same entry.</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="topic">
+    <div class="topic-label">2.6 &nbsp;·&nbsp; Study</div>
+    <div class="q">CDN — what can it cache, and what can it never cache?</div>
+    <div class="a">
+      A CDN caches responses at edge nodes (servers close to the user) keyed by URL. The next request for the same URL is served from the edge — your origin server is never hit.<br><br>
+      <strong>Can cache:</strong> <code>/static/index.html</code>, JavaScript, CSS, images — identical for every user, doesn't change between deploys.<br><br>
+      <strong>Cannot cache:</strong> <code>POST /ask</code> — the response depends on the question text, the retrieved documents, and the LLM output. Different users, different questions, different answers. CDN has no way to key on request body content.<br><br>
+      <span class="rule">Use CDN for static assets (edge cache by URL). Use Redis for dynamic API responses (app-layer cache by semantic key). They solve different problems.</span>
+    </div>
+  </div>
+
+</div>
+
 </body>
 </html>
